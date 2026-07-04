@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hitansh's Chapter Summariser</title>
-    <!-- Tailwind CSS for modern layouts -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- PWA Installation Requirements -->
+    <!-- PWA Settings -->
     <link rel="manifest" href="./manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -27,7 +27,6 @@
                 <p class="text-xs text-slate-400">Sign up or log in below to access your personal study history sandbox.</p>
             </div>
 
-            <!-- Login / Signup Form -->
             <form id="auth-form" class="space-y-4">
                 <div>
                     <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Create Username</label>
@@ -37,7 +36,7 @@
                     <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Password</label>
                     <input type="password" id="auth-password" required placeholder="••••••••" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition">
                 </div>
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-xl text-sm shadow-lg shadow-indigo-900/20 transition cursor-pointer">
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-xl text-sm shadow-lg transition cursor-pointer">
                     Enter Workspace
                 </button>
             </form>
@@ -66,105 +65,113 @@
             </div>
             <div class="space-y-2">
                 <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Registered Users Log</span>
-                <div id="admin-user-list" class="bg-slate-900 rounded-xl border border-slate-800 max-h-40 overflow-y-auto p-2 text-xs font-mono space-y-1 text-slate-400">
-                    <!-- User registry rows populate here -->
-                </div>
+                <div id="admin-user-list" class="bg-slate-900 rounded-xl border border-slate-800 max-h-40 overflow-y-auto p-2 text-xs font-mono space-y-1 text-slate-400"></div>
             </div>
         </div>
     </div>
 
-    <!-- ================= MAIN WORKSPACE INTERFACE ================= -->
+    <!-- ================= MAIN LAYOUT WRAPPER ================= -->
     <div class="flex h-full w-full relative overflow-hidden">
         
-        <!-- Sidebar Menu Panel Layout -->
-        <aside class="w-80 bg-slate-950 border-r border-slate-800 flex flex-col h-full shrink-0">
+        <!-- SIDEBAR PANEL (Now slides away on mobile so workspace is wide!) -->
+        <aside id="app-sidebar" class="w-72 bg-slate-950 border-r border-slate-800 flex flex-col h-full absolute lg:static z-40 transition-transform duration-300 -translate-x-full lg:translate-x-0 shrink-0">
             <div class="p-4 border-b border-slate-800 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <i class="fa-solid fa-graduation-cap text-indigo-400 text-xl"></i>
                     <div>
                         <h1 class="font-bold text-xs text-slate-200 tracking-wide uppercase">Hitansh's App</h1>
-                        <span id="user-profile-tag" class="text-[11px] text-indigo-400 font-medium block truncate max-w-[160px]">Not Logged In</span>
+                        <span id="user-profile-tag" class="text-[11px] text-indigo-400 font-medium block truncate max-w-[140px]">Not Logged In</span>
                     </div>
                 </div>
-                <button onclick="logOutCurrentUser()" class="text-slate-500 hover:text-rose-400 text-xs transition p-1" title="Log Out Account">
-                    <i class="fa-solid fa-power-off"></i>
+                <!-- Close menu button for phones -->
+                <button onclick="toggleSidebarMenu(false)" class="lg:hidden text-slate-500 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-sm"></i>
                 </button>
             </div>
             
             <div class="p-4 space-y-2">
-                <!-- Install Button (Hidden by default, shows if browser detects PWA triggers) -->
-                <button id="pwa-install-btn" class="hidden w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/40">
+                <button id="pwa-install-btn" class="hidden w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-2">
                     <i class="fa-solid fa-download"></i>
                     <span>INSTALL HOME SCREEN APP</span>
                 </button>
 
-                <button id="btn-trigger-new" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-950/40 text-xs">
+                <button id="btn-trigger-new" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 px-4 rounded-xl transition flex items-center justify-center gap-2 text-xs">
                     <i class="fa-solid fa-plus text-[10px]"></i>
                     <span>New Summary Workspace</span>
                 </button>
             </div>
             
-            <!-- History Dynamic Row Container Box -->
             <div class="flex-1 overflow-y-auto px-4 pb-4">
                 <h2 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Your Personal Chapters</h2>
                 <div id="history-container" class="space-y-2"></div>
             </div>
 
-            <!-- Hidden Admin Entrance Key Area -->
             <div class="p-3 border-t border-slate-800/60 bg-slate-950 text-center">
                 <button onclick="triggerAdminAuthSequence()" class="text-[10px] text-slate-700 hover:text-indigo-900 font-mono transition">🔒 [Admin System Panel]</button>
             </div>
+            
+            <div class="p-3 bg-slate-950 text-center border-t border-slate-900">
+                <button onclick="logOutCurrentUser()" class="text-xs text-rose-500 hover:text-rose-400 font-semibold flex items-center justify-center gap-2 mx-auto">
+                    <i class="fa-solid fa-power-off"></i> Log Out Account
+                </button>
+            </div>
         </aside>
 
-        <!-- Main Content Core Layout Area -->
-        <main class="flex-1 flex flex-col h-full bg-slate-900 relative overflow-hidden">
+        <!-- MAIN WORKSPACE CONTENT AREA (Takes up 100% width on phone now!) -->
+        <main class="flex-1 flex flex-col h-full bg-slate-900 relative overflow-hidden w-full">
             <!-- Top App Header -->
-            <header class="h-14 border-b border-slate-800 bg-slate-950/30 backdrop-blur flex items-center justify-between px-6 shrink-0">
-                <span class="font-bold text-slate-200 text-sm">Workspace Environment Dashboard</span>
-                <span class="text-[10px] text-slate-400 bg-slate-800/60 px-3 py-1.5 rounded-full border border-slate-700/50 flex items-center gap-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span> Isolated Account Sandbox Encrypted
+            <header class="h-14 border-b border-slate-800 bg-slate-950/30 backdrop-blur flex items-center justify-between px-4 lg:px-6 shrink-0">
+                <div class="flex items-center gap-3">
+                    <!-- Hamburger Toggle Icon for Mobile Screen -->
+                    <button onclick="toggleSidebarMenu(true)" class="lg:hidden text-slate-400 hover:text-white p-1 text-base">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <span class="font-bold text-slate-200 text-xs lg:text-sm">Workspace Environment Dashboard</span>
+                </div>
+                <span class="text-[9px] lg:text-[10px] text-slate-400 bg-slate-800/60 px-2.5 py-1 rounded-full border border-slate-700/50">
+                    🔒 Isolated Sandbox
                 </span>
             </header>
 
-            <!-- Dynamic Workspace Core Cards Frame -->
-            <div class="flex-1 overflow-y-auto p-6">
+            <!-- Workspace View Card Wrapper -->
+            <div class="flex-1 overflow-y-auto p-4 lg:p-6 w-full">
                 
                 <!-- STATE A: Upload Form Container Workspace Panel -->
-                <div id="view-upload" class="max-w-2xl mx-auto my-8 space-y-6">
+                <div id="view-upload" class="max-w-2xl mx-auto my-4 lg:my-8 space-y-6">
                     <div class="text-center space-y-1.5">
-                        <h2 class="text-2xl font-black text-white tracking-tight">Transform Textbooks Into Flashcards</h2>
+                        <h2 class="text-xl lg:text-2xl font-black text-white tracking-tight">Transform Textbooks Into Flashcards</h2>
                         <p class="text-slate-400 text-xs max-w-md mx-auto">Upload images or digital records. Our local layout scripts generate private bullet revision cards completely unique to your profile account.</p>
                     </div>
 
-                    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
+                    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 lg:p-6 space-y-4 shadow-xl">
                         <div>
                             <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Chapter Subject Title</label>
                             <input type="text" id="input-subject" placeholder="e.g., Chemistry - Chemical Bonding Chapter 2" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition">
                         </div>
-                        <div id="drop-zone" class="border-2 border-dashed border-slate-800 hover:border-indigo-500 rounded-2xl p-8 text-center cursor-pointer bg-slate-900/20 transition flex flex-col items-center justify-center gap-2 group">
+                        <div id="drop-zone" class="border-2 border-dashed border-slate-800 hover:border-indigo-500 rounded-2xl p-6 lg:p-8 text-center cursor-pointer bg-slate-900/20 transition flex flex-col items-center justify-center gap-2 group">
                             <div class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-indigo-400 transition">
                                 <i class="fa-solid fa-file-arrow-up text-lg"></i>
                             </div>
                             <p class="text-xs font-semibold text-slate-200">Tap to load textbook screenshots or revision papers</p>
                         </div>
-                        <button id="btn-process" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-3 px-4 rounded-xl shadow-lg transition duration-200">
+                        <button id="btn-process" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-3 px-4 rounded-xl shadow-lg transition duration-200 cursor-pointer">
                             Compile and Summarise Chapter
                         </button>
                     </div>
                 </div>
 
                 <!-- STATE B: Results Dynamic Output Frame -->
-                <div id="view-results" class="hidden max-w-3xl mx-auto space-y-6 pb-6">
+                <div id="view-results" class="hidden max-w-2xl mx-auto space-y-4 pb-6">
                     <div class="border-b border-slate-800 pb-3 flex items-center justify-between">
                         <div>
                             <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">Active Study Session Workspace</span>
-                            <h2 id="result-title" class="text-xl font-extrabold text-white">Active Unit Node</h2>
+                            <h2 id="result-title" class="text-lg font-extrabold text-white">Active Unit Node</h2>
                         </div>
                         <button onclick="switchToUploadView()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-1.5 px-3 rounded-lg border border-slate-700/50 transition">
                             <i class="fa-solid fa-arrow-left mr-1"></i> Back
                         </button>
                     </div>
-                    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 space-y-3">
+                    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 lg:p-5 space-y-3">
                         <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wide flex items-center gap-1.5"><i class="fa-solid fa-list text-emerald-400"></i> Core Chapter Pointers</h3>
                         <div id="summary-pointers-box" class="text-xs text-slate-400 space-y-2 leading-relaxed"></div>
                     </div>
@@ -176,11 +183,9 @@
 
     <!-- ================= CONTROLLER ENGINE CORE SCRIPT ================= -->
     <script>
-        // System variables
         let currentActiveUser = null;
         let deferredPrompt = null;
 
-        // Domestic DOM Query Selectors
         const authScreen = document.getElementById('auth-screen');
         const authForm = document.getElementById('auth-form');
         const authUsername = document.getElementById('auth-username');
@@ -198,52 +203,59 @@
         const adminModal = document.getElementById('admin-modal');
         const adminTotalCount = document.getElementById('admin-total-count');
         const adminUserList = document.getElementById('admin-user-list');
+        const appSidebar = document.getElementById('app-sidebar');
 
-        // PWA Native Installer Engine Capture 
+        // Sidebar responsive menu actions
+        function toggleSidebarMenu(open) {
+            if (open) {
+                appSidebar.classList.remove('-translate-x-full');
+            } else {
+                appSidebar.classList.add('-translate-x-full');
+            }
+        }
+
+        document.getElementById('btn-trigger-new').addEventListener('click', () => {
+            switchToUploadView();
+            toggleSidebarMenu(false);
+        });
+
+        // PWA Setup
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            pwaInstallBtn.classList.remove('hidden'); // Reveal download button to users
+            pwaInstallBtn.classList.remove('hidden');
         });
 
         pwaInstallBtn.addEventListener('click', async () => {
             if (!deferredPrompt) return;
             deferredPrompt.prompt();
             const { outcome } = await deferredPrompt.userChoice;
-            if (outcome === 'accepted') {
-                console.log('User installed the application.');
-            }
             deferredPrompt = null;
             pwaInstallBtn.classList.add('hidden');
         });
 
-        // App Authentication Layer Controls
+        // Auth Layer
         authForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const username = authUsername.value.trim().toLowerCase();
             const password = authPassword.value;
-
             if (!username || !password) return;
 
-            // Global Master Registry Layer for Admin tracking
             let registry = JSON.parse(localStorage.getItem('hcs_global_user_registry')) || [];
             if (!registry.includes(username)) {
                 registry.push(username);
                 localStorage.setItem('hcs_global_user_registry', JSON.stringify(registry));
             }
 
-            // Bind current account active runtime session
             currentActiveUser = username;
             localStorage.setItem('hcs_active_session_user', username);
-            
             userProfileTag.innerText = `@${username}`;
-            authScreen.classList.add('hidden'); // Drop screen lock overlay
+            authScreen.classList.add('hidden');
             
             renderUserAccountHistory();
             switchToUploadView();
         });
 
-        // Automatically log user back in if session is saved
         window.addEventListener('DOMContentLoaded', () => {
             const savedUser = localStorage.getItem('hcs_active_session_user');
             if (savedUser) {
@@ -262,6 +274,7 @@
             authUsername.value = '';
             authPassword.value = '';
             authScreen.classList.remove('hidden');
+            toggleSidebarMenu(false);
         }
 
         // Summary Core Engine
@@ -270,16 +283,14 @@
             const finalTitle = titleRaw || `Revision Folder #${Date.now().toString().slice(-4)}`;
             if (!currentActiveUser) return;
 
-            // Load specific user records dictionary matrix
             let userHistory = JSON.parse(localStorage.getItem(`hcs_history_v2_${currentActiveUser}`)) || [];
-            
             const newRecord = {
                 id: 'rec_' + Date.now(),
                 title: finalTitle,
                 pointers: [
-                    `Key foundational evaluation summary notes for <b>${finalTitle}</b> prepared exclusively under user account sandbox layout.`,
-                    "Primary Component Guideline: Variables mapping secondary indicators must be processed inside a localized buffer loop setup.",
-                    "Important Exam Warning: Do not swap inverse constants during evaluation workflows to protect fractional marks tracking indices."
+                    `Key foundational evaluation summary notes for <b>${finalTitle}</b> prepared inside user account dashboard.`,
+                    "Primary Component Guideline: Textbook variables mapping secondary indicators must be processed step-by-step.",
+                    "Important Exam Warning: Do not swap inverse constants during evaluation workflows to protect structural tracking indexes."
                 ]
             };
 
@@ -304,7 +315,10 @@
             userHistory.forEach(item => {
                 const btn = document.createElement('button');
                 btn.className = "w-full text-left p-2.5 rounded-xl border border-slate-800 bg-slate-900/50 text-slate-300 hover:text-white hover:bg-slate-900 transition truncate text-xs font-medium block";
-                btn.onclick = () => loadActiveSummaryView(item);
+                btn.onclick = () => {
+                    loadActiveSummaryView(item);
+                    toggleSidebarMenu(false);
+                };
                 btn.innerHTML = `<i class="fa-solid fa-file-signature text-indigo-500 mr-1.5 text-[10px]"></i> ${item.title}`;
                 historyContainer.appendChild(btn);
             });
@@ -315,7 +329,7 @@
             summaryPointersBox.innerHTML = '';
             item.pointers.forEach(pt => {
                 const li = document.createElement('div');
-                li.className = "p-2 bg-slate-900 border border-slate-800 rounded-xl relative pl-6 before:content-[''] before:absolute before:left-2.5 before:top-4 before:w-1 before:h-1 before:bg-indigo-400 before:rounded-full";
+                li.className = "p-3 bg-slate-900 border border-slate-800 rounded-xl relative pl-6 before:content-[''] before:absolute before:left-2.5 before:top-4.5 before:w-1 before:h-1 before:bg-indigo-400 before:rounded-full";
                 li.innerHTML = pt;
                 summaryPointersBox.appendChild(li);
             });
@@ -328,11 +342,11 @@
             viewUpload.classList.remove('hidden');
         }
 
-        // ================= HIDDEN ADMIN CONTROLS =================
+        // Admin panel logic
         function triggerAdminAuthSequence() {
             const accessKey = prompt("Enter Master Dashboard Secret Key Pin:");
-            // Your private admin access key is set to "hitansh777" by default
             if (accessKey === "hitansh777") {
+                toggleSidebarMenu(false);
                 toggleAdminModal(true);
             } else {
                 alert("Access Denied. Terminal Auth Failed.");
@@ -363,7 +377,6 @@
             }
         }
 
-        // Core App Background Sync registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
