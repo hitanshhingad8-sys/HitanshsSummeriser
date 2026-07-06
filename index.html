@@ -1,390 +1,315 @@
-<!DOCTYPE html>
+            <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="google-site-verification" content="YOUR_SECRET_CODE_FROM_GOOGLE" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hitansh's Chapter Summariser</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="google-site-verification" content="YOUR_SECRET_CODE_FROM_GOOGLE" />
+    <title>HitanshsSummeriser - Chapter Summariser App</title>
     
-    <!-- PWA Settings -->
-    <link rel="manifest" href="./manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    
+    <style>
+        /* Custom scrollbar optimization for mobile views */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.05); }
+        ::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.3); border-radius: 4px; }
+    </style>
 </head>
-<body class="bg-slate-900 text-slate-100 font-sans h-screen overflow-hidden antialiased">
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-indigo-500/30 selection:text-indigo-200">
 
-    <!-- ================= AUTH SCREEN ================= -->
-    <div id="auth-screen" class="fixed inset-0 bg-slate-950 z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md space-y-6 shadow-2xl">
-            <div class="text-center space-y-2">
-                <div class="w-12 h-12 bg-indigo-600 rounded-xl mx-auto flex items-center justify-center shadow-lg shadow-indigo-900/40">
-                    <i class="fa-solid fa-book-open text-white text-xl"></i>
-                </div>
-                <h2 class="text-xl font-bold text-white tracking-tight">Hitansh's Chapter Summariser</h2>
-                <p class="text-xs text-slate-400">Sign up or log in below to access your personal study history sandbox.</p>
-            </div>
-
-            <form id="auth-form" class="space-y-4">
-                <div>
-                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Create Username</label>
-                    <input type="text" id="auth-username" required placeholder="Enter a unique username" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Password</label>
-                    <input type="password" id="auth-password" required placeholder="••••••••" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition">
-                </div>
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-xl text-sm shadow-lg transition cursor-pointer">
-                    Enter Workspace
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- ================= HIDDEN ADMIN MODAL ================= -->
-    <div id="admin-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-        <div class="bg-slate-950 border border-indigo-500/30 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                <div class="flex items-center gap-2 text-indigo-400">
-                    <i class="fa-solid fa-user-shield"></i>
-                    <h3 class="font-bold text-sm uppercase tracking-wider text-slate-200">Hitansh's Admin Terminal</h3>
-                </div>
-                <button onclick="toggleAdminModal(false)" class="text-slate-400 hover:text-white text-sm"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 text-center">
-                    <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider block">Total Registered Users</span>
-                    <span id="admin-total-count" class="text-3xl font-black text-indigo-400">0</span>
-                </div>
-                <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 text-center">
-                    <span class="text-[10px] uppercase font-bold text-slate-500 tracking-wider block">System Status</span>
-                    <span class="text-xs font-bold text-emerald-400 mt-2 block flex items-center justify-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Online</span>
-                </div>
-            </div>
-            <div class="space-y-2">
-                <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Registered Users Log</span>
-                <div id="admin-user-list" class="bg-slate-900 rounded-xl border border-slate-800 max-h-40 overflow-y-auto p-2 text-xs font-mono space-y-1 text-slate-400"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================= MAIN LAYOUT WRAPPER ================= -->
-    <div class="flex h-full w-full relative overflow-hidden">
+    <div id="appContainer" class="relative flex flex-col min-h-screen w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         
-        <!-- SIDEBAR PANEL (Now slides away on mobile so workspace is wide!) -->
-        <aside id="app-sidebar" class="w-72 bg-slate-950 border-r border-slate-800 flex flex-col h-full absolute lg:static z-40 transition-transform duration-300 -translate-x-full lg:translate-x-0 shrink-0">
-            <div class="p-4 border-b border-slate-800 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-graduation-cap text-indigo-400 text-xl"></i>
-                    <div>
-                        <h1 class="font-bold text-xs text-slate-200 tracking-wide uppercase">Hitansh's App</h1>
-                        <span id="user-profile-tag" class="text-[11px] text-indigo-400 font-medium block truncate max-w-[140px]">Not Logged In</span>
-                    </div>
+        <header class="flex items-center justify-between border-b border-slate-800/60 pb-4 mb-6">
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    <span class="font-black text-lg tracking-wider text-white">HS</span>
                 </div>
-                <!-- Close menu button for phones -->
-                <button onclick="toggleSidebarMenu(false)" class="lg:hidden text-slate-500 hover:text-white p-1">
-                    <i class="fa-solid fa-xmark text-sm"></i>
-                </button>
-            </div>
-            
-            <div class="p-4 space-y-2">
-                <button id="pwa-install-btn" class="hidden w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-download"></i>
-                    <span>INSTALL HOME SCREEN APP</span>
-                </button>
-
-                <button id="btn-trigger-new" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 px-4 rounded-xl transition flex items-center justify-center gap-2 text-xs">
-                    <i class="fa-solid fa-plus text-[10px]"></i>
-                    <span>New Summary Workspace</span>
-                </button>
-            </div>
-            
-            <div class="flex-1 overflow-y-auto px-4 pb-4">
-                <h2 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Your Personal Chapters</h2>
-                <div id="history-container" class="space-y-2"></div>
-            </div>
-
-            <div class="p-3 border-t border-slate-800/60 bg-slate-950 text-center">
-                <button onclick="triggerAdminAuthSequence()" class="text-[10px] text-slate-700 hover:text-indigo-900 font-mono transition">🔒 [Admin System Panel]</button>
-            </div>
-            
-            <div class="p-3 bg-slate-950 text-center border-t border-slate-900">
-                <button onclick="logOutCurrentUser()" class="text-xs text-rose-500 hover:text-rose-400 font-semibold flex items-center justify-center gap-2 mx-auto">
-                    <i class="fa-solid fa-power-off"></i> Log Out Account
-                </button>
-            </div>
-        </aside>
-
-        <!-- MAIN WORKSPACE CONTENT AREA (Takes up 100% width on phone now!) -->
-        <main class="flex-1 flex flex-col h-full bg-slate-900 relative overflow-hidden w-full">
-            <!-- Top App Header -->
-            <header class="h-14 border-b border-slate-800 bg-slate-950/30 backdrop-blur flex items-center justify-between px-4 lg:px-6 shrink-0">
-                <div class="flex items-center gap-3">
-                    <!-- Hamburger Toggle Icon for Mobile Screen -->
-                    <button onclick="toggleSidebarMenu(true)" class="lg:hidden text-slate-400 hover:text-white p-1 text-base">
-                        <i class="fa-solid fa-bars"></i>
-                    </button>
-                    <span class="font-bold text-slate-200 text-xs lg:text-sm">Workspace Environment Dashboard</span>
+                <div>
+                    <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-slate-400">HitanshsSummeriser</h1>
+                    <p class="text-xs text-indigo-400 font-medium">Next-Gen Content AI Processor</p>
                 </div>
-                <span class="text-[9px] lg:text-[10px] text-slate-400 bg-slate-800/60 px-2.5 py-1 rounded-full border border-slate-700/50">
-                    🔒 Isolated Sandbox
-                </span>
-            </header>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <span id="userProfileTag" class="text-sm font-semibold bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl text-slate-300">@guest</span>
+                <button onclick="toggleAdminModal(true)" class="text-xs font-medium text-slate-400 hover:text-indigo-400 transition">Admin Panel</button>
+            </div>
+        </header>
 
-            <!-- Workspace View Card Wrapper -->
-            <div class="flex-1 overflow-y-auto p-4 lg:p-6 w-full">
+        <div id="authScreen" class="fixed inset-0 bg-slate-950/95 z-50 flex items-center justify-center px-4">
+            <div class="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-2xl w-full max-w-md shadow-2xl">
+                <h2 class="text-2xl font-bold text-white mb-2">Create Account / Sign In</h2>
+                <p class="text-sm text-slate-400 mb-6">Access your workspace summaries securely from any smartphone screen layout.</p>
                 
-                <!-- STATE A: Upload Form Container Workspace Panel -->
-                <div id="view-upload" class="max-w-2xl mx-auto my-4 lg:my-8 space-y-6">
-                    <div class="text-center space-y-1.5">
-                        <h2 class="text-xl lg:text-2xl font-black text-white tracking-tight">Transform Textbooks Into Flashcards</h2>
-                        <p class="text-slate-400 text-xs max-w-md mx-auto">Upload images or digital records. Our local layout scripts generate private bullet revision cards completely unique to your profile account.</p>
+                <form id="authForm" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Username</label>
+                        <input id="authUsername" type="text" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition">
                     </div>
-
-                    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 lg:p-6 space-y-4 shadow-xl">
-                        <div>
-                            <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Chapter Subject Title</label>
-                            <input type="text" id="input-subject" placeholder="e.g., Chemistry - Chemical Bonding Chapter 2" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition">
-                        </div>
-                        <div id="drop-zone" class="border-2 border-dashed border-slate-800 hover:border-indigo-500 rounded-2xl p-6 lg:p-8 text-center cursor-pointer bg-slate-900/20 transition flex flex-col items-center justify-center gap-2 group">
-                            <div class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-indigo-400 transition">
-                                <i class="fa-solid fa-file-arrow-up text-lg"></i>
-                            </div>
-                            <p class="text-xs font-semibold text-slate-200">Tap to load textbook screenshots or revision papers</p>
-                        </div>
-                        <button id="btn-process" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-3 px-4 rounded-xl shadow-lg transition duration-200 cursor-pointer">
-                            Compile and Summarise Chapter
-                        </button>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Password</label>
+                        <input id="authPassword" type="password" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition">
                     </div>
-                </div>
-
-                <!-- STATE B: Results Dynamic Output Frame -->
-                <div id="view-results" class="hidden max-w-2xl mx-auto space-y-4 pb-6">
-                    <div class="border-b border-slate-800 pb-3 flex items-center justify-between">
-                        <div>
-                            <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">Active Study Session Workspace</span>
-                            <h2 id="result-title" class="text-lg font-extrabold text-white">Active Unit Node</h2>
-                        </div>
-                        <button onclick="switchToUploadView()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-1.5 px-3 rounded-lg border border-slate-700/50 transition">
-                            <i class="fa-solid fa-arrow-left mr-1"></i> Back
-                        </button>
-                    </div>
-                    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 lg:p-5 space-y-3">
-                        <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wide flex items-center gap-1.5"><i class="fa-solid fa-list text-emerald-400"></i> Core Chapter Pointers</h3>
-                        <div id="summary-pointers-box" class="text-xs text-slate-400 space-y-2 leading-relaxed"></div>
-                    </div>
-                </div>
-
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-indigo-600/20 transition duration-200 active:scale-[0.98]">
+                        Open Secure Vault Dashboard
+                    </button>
+                </form>
             </div>
+        </div>
+
+        <main class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 items-start">
+            
+            <section class="lg:col-span-5 bg-slate-900/40 border border-slate-800/60 rounded-2xl p-5 space-y-5 backdrop-blur-sm">
+                <div>
+                    <h3 class="text-base font-bold text-white mb-1">Upload Study Material</h3>
+                    <p class="text-xs text-slate-400">Upload books, images, or chapter notes to process.</p>
+                </div>
+                
+                <div class="border-2 border-dashed border-slate-800 hover:border-indigo-500/50 bg-slate-950/40 rounded-xl p-8 transition flex flex-col items-center justify-center text-center cursor-pointer group">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-slate-500 group-hover:text-indigo-400 transition mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <span class="text-sm font-medium text-slate-300">Drop files or click to scan data</span>
+                    <span class="text-xs text-slate-500 mt-1">PDF, DOCX, TXT, or Image Assets</span>
+                </div>
+                
+                <button id="processBtn" onclick="executeMockAISummarization()" class="w-full bg-slate-800 hover:bg-slate-700 text-indigo-300 font-semibold py-3 px-4 rounded-xl border border-slate-700/50 transition flex items-center justify-center gap-2 text-sm">
+                    Generate AI Core Summary
+                </button>
+            </section>
+
+            <section class="lg:col-span-7 flex flex-col bg-slate-900/40 border border-slate-800/60 rounded-2xl p-5 min-h-[400px] backdrop-blur-sm">
+                <div class="flex items-center justify-between border-b border-slate-800/60 pb-3 mb-4">
+                    <div>
+                        <h3 class="text-base font-bold text-white mb-0.5">AI Output Core Terminal</h3>
+                        <p class="text-xs text-slate-400">Processed structures and smart summaries appear here.</p>
+                    </div>
+                </div>
+                
+                <div id="summaryOutput" class="flex-1 text-sm leading-relaxed text-slate-300 bg-slate-950/60 border border-slate-800/40 rounded-xl p-4 overflow-y-auto max-h-[500px]">
+                    <div class="text-slate-500 italic flex items-center justify-center h-full min-h-[200px]">
+                        Waiting for file parsing sequence to run...
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3 mt-4 border-t border-slate-800/60 pt-3">
+                    <button onclick="copySummaryToClipboard()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium py-2 px-4 rounded-xl transition flex items-center gap-2 text-sm active:scale-95">
+                        Copy Text Sheet
+                    </button>
+                    
+                    <button id="downloadBtn" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-xl transition duration-200 flex items-center gap-2 text-sm shadow-md active:scale-95">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Download Document (.doc)
+                    </button>
+                </div>
+            </section>
         </main>
+
+        <div id="adminModal" class="hidden fixed inset-0 bg-slate-950/80 z-50 items-center justify-center px-4 backdrop-blur-sm">
+            <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-2xl p-6 shadow-2xl flex flex-col max-h-[85vh]">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-white">Central Admin Panel</h3>
+                        <p class="text-xs text-slate-400">Total metrics and saved developer logs inside your network tree.</p>
+                    </div>
+                    <button onclick="toggleAdminModal(false)" class="text-slate-400 hover:text-white text-xl font-bold px-2">&times;</button>
+                </div>
+                
+                <div class="bg-slate-950 border border-slate-800/60 p-4 rounded-xl mb-4 flex items-center justify-between">
+                    <span class="text-sm font-semibold text-slate-300">Total Logged Registries (All-Time):</span>
+                    <span id="adminTotalCount" class="text-2xl font-black text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-lg border border-indigo-500/20">0</span>
+                </div>
+
+                <div id="adminUserList" class="flex-1 overflow-y-auto space-y-2 text-xs font-mono text-slate-400 pr-1 max-h-[300px]">
+                    <div>Scanning system tracking array registries...</div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- ================= CONTROLLER ENGINE CORE SCRIPT ================= -->
     <script>
-        let currentActiveUser = null;
-        let deferredPrompt = null;
+        // --- 1. CLOUD CONNECTION INITIALIZER ENGINE ---
+        // If you have your Firebase configuration keys, paste them inside this object block below!
+        const firebaseConfig = {
+            apiKey: "YOUR_COPIED_API_KEY",
+            authDomain: "YOUR_COPIED_AUTH_DOMAIN",
+            databaseURL: "YOUR_COPIED_DATABASE_URL",
+            projectId: "YOUR_COPIED_PROJECT_ID",
+            storageBucket: "YOUR_COPIED_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_COPIED_MESSAGING_SENDER_ID",
+            appId: "YOUR_COPIED_APP_ID"
+        };
 
-        const authScreen = document.getElementById('auth-screen');
-        const authForm = document.getElementById('auth-form');
-        const authUsername = document.getElementById('auth-username');
-        const authPassword = document.getElementById('auth-password');
-        const userProfileTag = document.getElementById('user-profile-tag');
-        const pwaInstallBtn = document.getElementById('pwa-install-btn');
-        const historyContainer = document.getElementById('history-container');
-        const viewUpload = document.getElementById('view-upload');
-        const viewResults = document.getElementById('view-results');
-        const inputSubject = document.getElementById('input-subject');
-        const btnProcess = document.getElementById('btn-process');
-        const resultTitle = document.getElementById('result-title');
-        const summaryPointersBox = document.getElementById('summary-pointers-box');
-        
-        const adminModal = document.getElementById('admin-modal');
-        const adminTotalCount = document.getElementById('admin-total-count');
-        const adminUserList = document.getElementById('admin-user-list');
-        const appSidebar = document.getElementById('app-sidebar');
+        let database = null;
+        let isFirebaseActive = false;
 
-        // Sidebar responsive menu actions
-        function toggleSidebarMenu(open) {
-            if (open) {
-                appSidebar.classList.remove('-translate-x-full');
-            } else {
-                appSidebar.classList.add('-translate-x-full');
+        // Secure integration setup: verifies credentials before attaching global listeners
+        if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_COPIED_API_KEY") {
+            try {
+                firebase.initializeApp(firebaseConfig);
+                database = firebase.database();
+                isFirebaseActive = true;
+                console.log("Firebase Engine Connection: ONLINE");
+            } catch (err) {
+                console.error("Firebase Initialization Error:", err);
             }
+        } else {
+            console.warn("Firebase config elements not added yet. Falling back to local internal device storage loops safely.");
         }
 
-        document.getElementById('btn-trigger-new').addEventListener('click', () => {
-            switchToUploadView();
-            toggleSidebarMenu(false);
-        });
+        // Global context variables
+        let currentActiveUser = "guest";
+        const authScreen = document.getElementById('authScreen');
+        const authForm = document.getElementById('authForm');
+        const authUsername = document.getElementById('authUsername');
+        const authPassword = document.getElementById('authPassword');
+        const userProfileTag = document.getElementById('userProfileTag');
+        const summaryResultArea = document.getElementById('summaryOutput');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const adminModal = document.getElementById('adminModal');
+        const adminTotalCount = document.getElementById('adminTotalCount');
+        const adminUserList = document.getElementById('adminUserList');
 
-        // PWA Setup
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            pwaInstallBtn.classList.remove('hidden');
-        });
-
-        pwaInstallBtn.addEventListener('click', async () => {
-            if (!deferredPrompt) return;
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            deferredPrompt = null;
-            pwaInstallBtn.classList.add('hidden');
-        });
-
-        // Auth Layer
+        // --- 2. AUTH REGISTRY EXECUTION LOGIC ---
         authForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const username = authUsername.value.trim().toLowerCase();
             const password = authPassword.value;
             if (!username || !password) return;
 
-            let registry = JSON.parse(localStorage.getItem('hcs_global_user_registry')) || [];
-            if (!registry.includes(username)) {
-                registry.push(username);
-                localStorage.setItem('hcs_global_user_registry', JSON.stringify(registry));
-            }
-
             currentActiveUser = username;
-            localStorage.setItem('hcs_active_session_user', username);
             userProfileTag.innerText = `@${username}`;
             authScreen.classList.add('hidden');
-            
-            renderUserAccountHistory();
-            switchToUploadView();
-        });
 
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedUser = localStorage.getItem('hcs_active_session_user');
-            if (savedUser) {
-                currentActiveUser = savedUser;
-                userProfileTag.innerText = `@${savedUser}`;
-                authScreen.classList.add('hidden');
-                renderUserAccountHistory();
-                switchToUploadView();
-            }
-        });
-
-        function logOutCurrentUser() {
-            localStorage.removeItem('hcs_active_session_user');
-            currentActiveUser = null;
-            userProfileTag.innerText = "Not Logged In";
-            authUsername.value = '';
-            authPassword.value = '';
-            authScreen.classList.remove('hidden');
-            toggleSidebarMenu(false);
-        }
-
-        // Summary Core Engine
-        btnProcess.addEventListener('click', () => {
-            const titleRaw = inputSubject.value.trim();
-            const finalTitle = titleRaw || `Revision Folder #${Date.now().toString().slice(-4)}`;
-            if (!currentActiveUser) return;
-
-            let userHistory = JSON.parse(localStorage.getItem(`hcs_history_v2_${currentActiveUser}`)) || [];
-            const newRecord = {
-                id: 'rec_' + Date.now(),
-                title: finalTitle,
-                pointers: [
-                    `Key foundational evaluation summary notes for <b>${finalTitle}</b> prepared inside user account dashboard.`,
-                    "Primary Component Guideline: Textbook variables mapping secondary indicators must be processed step-by-step.",
-                    "Important Exam Warning: Do not swap inverse constants during evaluation workflows to protect structural tracking indexes."
-                ]
-            };
-
-            userHistory.unshift(newRecord);
-            localStorage.setItem(`hcs_history_v2_${currentActiveUser}`, JSON.stringify(userHistory));
-            
-            inputSubject.value = '';
-            renderUserAccountHistory();
-            loadActiveSummaryView(newRecord);
-        });
-
-        function renderUserAccountHistory() {
-            if (!currentActiveUser) return;
-            let userHistory = JSON.parse(localStorage.getItem(`hcs_history_v2_${currentActiveUser}`)) || [];
-            
-            if (userHistory.length === 0) {
-                historyContainer.innerHTML = `<div class="text-[11px] text-slate-600 text-center py-4 italic">No personal files saved yet. Try uploading one!</div>`;
-                return;
-            }
-
-            historyContainer.innerHTML = '';
-            userHistory.forEach(item => {
-                const btn = document.createElement('button');
-                btn.className = "w-full text-left p-2.5 rounded-xl border border-slate-800 bg-slate-900/50 text-slate-300 hover:text-white hover:bg-slate-900 transition truncate text-xs font-medium block";
-                btn.onclick = () => {
-                    loadActiveSummaryView(item);
-                    toggleSidebarMenu(false);
-                };
-                btn.innerHTML = `<i class="fa-solid fa-file-signature text-indigo-500 mr-1.5 text-[10px]"></i> ${item.title}`;
-                historyContainer.appendChild(btn);
-            });
-        }
-
-        function loadActiveSummaryView(item) {
-            resultTitle.innerText = item.title;
-            summaryPointersBox.innerHTML = '';
-            item.pointers.forEach(pt => {
-                const li = document.createElement('div');
-                li.className = "p-3 bg-slate-900 border border-slate-800 rounded-xl relative pl-6 before:content-[''] before:absolute before:left-2.5 before:top-4.5 before:w-1 before:h-1 before:bg-indigo-400 before:rounded-full";
-                li.innerHTML = pt;
-                summaryPointersBox.appendChild(li);
-            });
-            viewUpload.classList.add('hidden');
-            viewResults.classList.remove('hidden');
-        }
-
-        function switchToUploadView() {
-            viewResults.classList.add('hidden');
-            viewUpload.classList.remove('hidden');
-        }
-
-        // Admin panel logic
-        function triggerAdminAuthSequence() {
-            const accessKey = prompt("Enter Master Dashboard Secret Key Pin:");
-            if (accessKey === "hitansh777") {
-                toggleSidebarMenu(false);
-                toggleAdminModal(true);
+            if (isFirebaseActive && database) {
+                // Cloud Sync Strategy: Save immediately to live database
+                database.ref('global_users/' + username).set({
+                    registeredAt: Date.now(),
+                    status: "Active"
+                });
             } else {
-                alert("Access Denied. Terminal Auth Failed.");
+                // Local Backup Storage Strategy
+                let localUsers = JSON.parse(localStorage.getItem('hcs_local_users') || '[]');
+                if (!localUsers.includes(username)) {
+                    localUsers.push(username);
+                    localStorage.setItem('hcs_local_users', JSON.stringify(localUsers));
+                }
             }
+        });
+
+        // --- 3. MOCK AI GENERATION & RENDER ENGINE ---
+        function executeMockAISummarization() {
+            summaryResultArea.innerHTML = `<div class="text-indigo-400 font-medium flex items-center gap-2 h-full justify-center min-h-[200px]">
+                <svg class="animate-spin h-5 w-5 text-indigo-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                AI Model Parsing Structural Metadata Engine...
+            </div>`;
+            
+            setTimeout(() => {
+                summaryResultArea.innerHTML = `
+<h1 style="font-size: 1.25rem; font-weight: 800; color: #ffffff; margin-bottom: 0.5rem;">CHAPTER SUMMARY LOG: CONCEPTS</h1>
+<p style="margin-bottom: 1rem;">This document contains a structured summary generated directly via <strong>HitanshsSummeriser</strong> parsing nodes.</p>
+
+<h3 style="font-size: 1rem; font-weight: 700; color: #818cf8; margin-top: 1rem; margin-bottom: 0.25rem;">1. Core Structural Architectures</h3>
+<p style="margin-bottom: 0.75rem;">Applications operating across separate, standalone viewports require native, liquid element structures to completely eliminate vertical squishing on smart screens.</p>
+
+<h3 style="font-size: 1rem; font-weight: 700; color: #818cf8; margin-top: 1rem; margin-bottom: 0.25rem;">2. Persistent Storage Metrics</h3>
+<p style="margin-bottom: 0.75rem;">Upgrading an isolated standalone browser setup to an integrated database model shifts tracking analytics from local client memory sandboxes into global shared server matrices.</p>
+
+<h3 style="font-size: 1rem; font-weight: 700; color: #818cf8; margin-top: 1rem; margin-bottom: 0.25rem;">3. Universal File System Interactivity</h3>
+<p style="margin-bottom: 0.5rem;">By encoding strings directly into document asset blobs, content can bypass restrictive system walls to download into Microsoft Word or WPS Office layouts natively on laptops and mobile phones alike.</p>
+                `;
+                
+                // Reveal the download button once summary finishes processing
+                if (downloadBtn) downloadBtn.classList.remove('hidden');
+            }, 1200);
         }
 
+        // --- 4. ADVANCED MICROSOFT WORD / WPS OFFICE CONTENT DOWNLOAD PROTOCOL ---
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', () => {
+                const summaryText = summaryResultArea.innerHTML || summaryResultArea.textContent;
+                
+                if (!summaryText || summaryText.trim() === "" || summaryText.includes("Waiting for file")) {
+                    alert("Please generate an AI summary first before trying to download standard documents!");
+                    return;
+                }
+
+                // Inject official Word Document metadata and schemas so it reads accurately in WPS Office and Word
+                const documentHeader = "<html xmlns:o='urn:schemas-microsoft-com:office:office' "+
+                               "xmlns:w='urn:schemas-microsoft-com:office:word' "+
+                               "xmlns='http://www.w3.org/TR/REC-html40'>"+
+                               "<head><title>HitanshsSummeriser Export</title><style>body{font-family:Arial,sans-serif;padding:30px;line-height:1.6;color:#1e293b;}h1{color:#4338ca;border-bottom:2px solid #e2e8f0;padding-bottom:10px;}h3{color:#4f46e5;margin-top:20px;}p{font-size:11pt;}</style></head><body>";
+                const documentFooter = "</body></html>";
+                
+                const fullDocumentContent = documentHeader + summaryText + documentFooter;
+
+                // Build a secure Data Blob targeting standard Microsoft Word and WPS mime applications
+                const blob = new Blob(['\ufeff' + fullDocumentContent], {
+                    type: 'application/msword;charset=utf-8'
+                });
+
+                // Generate dynamic anchor link element parameters
+                const blobUrl = URL.createObjectURL(blob);
+                const fileDownloaderAnchor = document.createElement('a');
+                fileDownloaderAnchor.href = blobUrl;
+                
+                // Auto-generate name containing safe date stamps
+                const currentStamp = new Date().toLocaleDateString().replace(/\//g, '-');
+                fileDownloaderAnchor.download = `Summary_${currentStamp}.doc`;
+                
+                // Execute virtual download pipeline
+                document.body.appendChild(fileDownloaderAnchor);
+                fileDownloaderAnchor.click();
+                
+                // Garbage collection memory management cleanup routines
+                document.body.removeChild(fileDownloaderAnchor);
+                URL.revokeObjectURL(blobUrl);
+            });
+        }
+
+        // --- 5. CLIPBOARD HELPER ---
+        function copySummaryToClipboard() {
+            const rawText = summaryResultArea.innerText || summaryResultArea.textContent;
+            if (!rawText || rawText.includes("Waiting for file")) return;
+            navigator.clipboard.writeText(rawText);
+            alert("Summary data text strings copied directly into system clipboard arrays!");
+        }
+
+        // --- 6. ADMIN RECOGNITION TREE LOGIC ---
         function toggleAdminModal(show) {
             if (show) {
-                let registry = JSON.parse(localStorage.getItem('hcs_global_user_registry')) || [];
-                adminTotalCount.innerText = registry.length;
-                
                 adminUserList.innerHTML = '';
-                if (registry.length === 0) {
-                    adminUserList.innerHTML = '<div>No user registries recorded inside app matrix.</div>';
-                } else {
-                    registry.forEach((usr, index) => {
-                        const row = document.createElement('div');
-                        row.className = "border-b border-slate-800/40 py-1 flex justify-between";
-                        row.innerHTML = `<span>${index + 1}. @${usr}</span> <span class="text-indigo-500">[User Active]</span>`;
-                        adminUserList.appendChild(row);
+                
+                if (isFirebaseActive && database) {
+                    // Method A: Read cloud records from across the globe
+                    database.ref('global_users').once('value', (snapshot) => {
+                        const usersData = snapshot.val() || {};
+                        const totalUsersList = Object.keys(usersData);
+                        
+                        adminTotalCount.innerText = totalUsersList.length;
+                        
+                        if (totalUsersList.length === 0) {
+                            adminUserList.innerHTML = '<div class="py-2 italic text-slate-500">No cross-device cloud profiles detected yet.</div>';
+                        } else {
+                            totalUsersList.forEach((usr, idx) => {
+                                const elementRow = document.createElement('div');
+                                elementRow.className = "border-b border-slate-800/40 py-1.5 flex justify-between items-center";
+                                elementRow.innerHTML = `<span>${idx + 1}. @${usr}</span> <span class="text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider">[Cloud Saved]</span>`;
+                                adminUserList.appendChild(elementRow);
+                            });
+                        }
                     });
-                }
-                adminModal.classList.remove('hidden');
-                adminModal.classList.add('flex');
-            } else {
-                adminModal.classList.add('hidden');
-                adminModal.classList.remove('flex');
-            }
-        }
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then((reg) => console.log('Secure PWA Service Core Online.', reg.scope))
-                    .catch((err) => console.error('Core Script Failed:', err));
-            });
-        }
-    </script>
-</body>
-</html>
+                } else {
+                    // Method B: Failover safe mode displaying records created on this local device screen
+                    let localUsers = JSON.parse(localStorage.getItem('hcs_local_users') || '[]');
+                    adminTotalCount.innerText = localUsers.length;
+                    
+                    if (localUsers.length === 0) {
+                        adminUserList.innerHTML = '<div class="py-2 italic text-slate-500">No system accounts created on this active viewport yet.</div>';
+                    } else {
+ 
